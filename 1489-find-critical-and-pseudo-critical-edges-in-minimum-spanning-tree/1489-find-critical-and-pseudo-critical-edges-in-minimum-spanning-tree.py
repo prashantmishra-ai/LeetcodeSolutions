@@ -26,28 +26,26 @@ class Solution:
             return False
 
     def findCriticalAndPseudoCriticalEdges(self, n, edges):
-        new_edges = [edge.copy() for edge in edges]
         # Add index to edges for tracking
-        for i, edge in enumerate(new_edges):
-            edge.append(i)
+        edges_with_index = [(u, v, w, i) for i, (u, v, w) in enumerate(edges)]
         # Sort edges based on weight
-        new_edges.sort(key=lambda x: x[2])
+        edges_with_index.sort(key=lambda x: x[2])
 
         # Find MST weight using union-find
         uf_std = self.UnionFind(n)
         std_weight = 0
-        for u, v, w, _ in new_edges:
+        for u, v, w, _ in edges_with_index:
             if uf_std.union(u, v):
                 std_weight += w
 
         # Check each edge for critical and pseudo-critical
         critical = []
         pseudo_critical = []
-        for (u, v, w, i) in new_edges:
+        for u, v, w, i in edges_with_index:
             # Ignore this edge and calculate MST weight
             uf_ignore = self.UnionFind(n)
             ignore_weight = 0
-            for (x, y, w_ignore, j) in new_edges:
+            for x, y, w_ignore, j in edges_with_index:
                 if i != j and uf_ignore.union(x, y):
                     ignore_weight += w_ignore
             # If the graph is disconnected or the total weight is greater,
@@ -60,7 +58,7 @@ class Solution:
             uf_force = self.UnionFind(n)
             force_weight = w
             uf_force.union(u, v)
-            for (x, y, w_force, j) in new_edges:
+            for x, y, w_force, j in edges_with_index:
                 if i != j and uf_force.union(x, y):
                     force_weight += w_force
             # If total weight is the same, the edge is pseudo-critical
